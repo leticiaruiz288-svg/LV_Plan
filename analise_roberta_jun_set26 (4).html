@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Análise Financeira — Roberta · Jun–Set/26</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#12203a;--ink-2:#5b6b85;--paper:#f7f5f0;--card:#fff;--line:#e2ddd3;--teal:#0f6b64;--clay:#b4462f;--gold:#c8922a;--violet:#5b4b8a;--slate:#7a8699;--pos:#0f6b64;--neg:#b4462f;--warn:#c8922a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.6}
+.wrap{max-width:1100px;margin:0 auto;padding:32px 16px 80px}
+header{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:32px}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+h1{font-family:Fraunces,Georgia,serif;font-size:clamp(26px,5vw,42px);font-weight:700;letter-spacing:-.02em;margin-top:6px;line-height:1.1}
+.sub{color:var(--ink-2);font-size:13px;margin-top:8px}
+.section{margin-bottom:40px}
+.section-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2);border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:18px}
+h2.section-title{font-family:Fraunces,serif;font-size:22px;font-weight:700;margin-bottom:4px}
+.section-sub{font-size:13px;color:var(--ink-2);margin-bottom:18px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:28px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--k,var(--slate))}
+.kpi .lab{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.kpi .val{font-family:Fraunces,serif;font-size:clamp(20px,3.8vw,28px);font-weight:700;margin-top:6px;letter-spacing:-.01em}
+.kpi .note{font-size:11px;color:var(--ink-2);margin-top:4px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}
+.card h3{font-family:Fraunces,serif;font-size:15px;font-weight:600;margin-bottom:3px}
+.card .hint{font-size:11px;color:var(--ink-2);margin-bottom:14px}
+.bar-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-bottom:11px}
+.bar-lab{font-size:12px;display:flex;align-items:center;gap:7px;min-width:0}
+.dot{width:9px;height:9px;border-radius:2px;flex:none}
+.bar-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.bar-val{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;white-space:nowrap}
+.track{grid-column:1/-1;height:7px;background:#eeeae2;border-radius:4px;overflow:hidden}
+.fill{height:100%;border-radius:4px;transform-origin:left;animation:grow .8s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.timeline{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.tl-row{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;font-size:12px}
+.tl-month{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-2);font-weight:600}
+.tl-bars{display:flex;flex-direction:column;gap:4px}
+.tl-bar-wrap{display:flex;align-items:center;gap:8px}
+.tl-bar{height:18px;border-radius:3px;min-width:3px;display:flex;align-items:center;padding:0 6px}
+.tl-bar span{font:600 10px 'JetBrains Mono',monospace;color:#fff;white-space:nowrap}
+.tl-label{font-size:10.5px;color:var(--ink-2);white-space:nowrap}
+.insight{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;position:relative;padding-left:22px}
+.insight::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:10px 0 0 10px;background:var(--accent,var(--slate))}
+.insight .icon{font-size:20px;margin-bottom:6px}
+.insight h4{font-family:Fraunces,serif;font-size:14px;font-weight:700;margin-bottom:4px}
+.insight p{font-size:12.5px;color:var(--ink-2);line-height:1.55}
+.insight strong{color:var(--ink)}
+.note-box{background:#fdf6e8;border:1px solid #e8d9b0;border-left:3px solid var(--gold);border-radius:8px;padding:13px 15px;font-size:12.5px;color:#6d5a2a;margin-bottom:20px;line-height:1.55}
+.note-box b{color:#4d3f1a}
+.alert-box{background:#fdf0ee;border:1px solid #f0c5bb;border-left:3px solid var(--clay);border-radius:8px;padding:13px 15px;font-size:12.5px;color:#6b2c1f;margin-bottom:20px;line-height:1.55}
+.alert-box b{color:#4a1e13}
+.ok-box{background:#edf7f5;border:1px solid #b2dcd7;border-left:3px solid var(--teal);border-radius:8px;padding:13px 15px;font-size:12.5px;color:#1a4a46;margin-bottom:20px;line-height:1.55}
+.ok-box b{color:#0d3230}
+.tbl-simple{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+.tbl-simple th{text-align:left;padding:8px 10px;font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);border-bottom:1px solid var(--line)}
+.tbl-simple td{padding:8px 10px;border-bottom:1px solid #f1ede6}
+.tbl-simple tbody tr:hover{background:#faf8f4}
+.num{font-family:'JetBrains Mono',monospace;text-align:right;font-weight:600;white-space:nowrap}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+.divider{border:0;border-top:1px solid var(--line);margin:32px 0}
+.foot{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;color:var(--ink-2)}
+.month-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+@media(max-width:700px){.month-cards{grid-template-columns:repeat(2,1fr)}}
+.mc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center;position:relative;overflow:hidden}
+.mc::after{content:"";position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--mc-color,var(--slate))}
+.mc .mc-month{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px}
+.mc .mc-val{font-family:Fraunces,serif;font-size:clamp(18px,3vw,24px);font-weight:700}
+.mc .mc-sub{font-size:10.5px;color:var(--ink-2);margin-top:4px}
+.chart-area{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;overflow:hidden}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Análise Financeira · 4 meses</div>
+  <h1>Roberta</h1>
+  <p class="sub">Junho a Setembro/2026 · Elaborado com base no Dossiê v8 (set/26)</p>
+</header>
+
+<div class="section">
+  <div class="note-box">
+    <b>Sobre esta análise:</b> os valores são <b>líquidos</b>: quando entrou e saiu dinheiro na mesma categoria no mês (como o rateio da moradia), mostramos só a diferença. Junho foi registrado a partir de um extrato do Inter; de julho em diante o dossiê soma as duas contas (Inter PJ e C6 PF), então comparar junho com os outros meses pede um pouco de cuidado.
+  </div>
+
+  <div class="kpis">
+    <div class="kpi" style="--k:var(--teal)"><div class="lab">Entradas totais (4 meses)</div><div class="val pos">R$ 49.761</div><div class="note">Inclui transferências e reembolsos</div></div>
+    <div class="kpi" style="--k:var(--clay)"><div class="lab">Saídas totais (4 meses)</div><div class="val neg">R$ 47.028</div><div class="note">Todas as categorias somadas</div></div>
+    <div class="kpi" style="--k:var(--violet)"><div class="lab">Média mensal de entrada</div><div class="val">R$ 12.440</div><div class="note">Varia conforme a mesada e as entradas pontuais</div></div>
+    <div class="kpi" style="--k:var(--slate)"><div class="lab">Média mensal de saída</div><div class="val">R$ 11.757</div><div class="note">Líquida do rateio da moradia</div></div>
+    <div class="kpi" style="--k:var(--teal)"><div class="lab">Contas cobertas sem a mesada</div><div class="val pos">69%</div><div class="note">Em setembro · era 55% em junho</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-label">01 · Resultado mês a mês</div>
+  <h2 class="section-title">Como foi cada mês?</h2>
+  <p class="section-sub">Dois meses positivos e dois um pouco abaixo de zero. A diferença entre eles vem sobretudo de entradas pontuais e do peso da moradia em cada mês.</p>
+
+  <div class="chart-area">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-bottom:14px">Entradas vs. Saídas por mês (R$)</div>
+    <div class="timeline">
+      <div class="tl-row">
+        <div class="tl-month">JUN</div>
+        <div class="tl-bars">
+          <div class="tl-bar-wrap">
+            <div class="tl-bar" style="width:calc(13122/14225*100% * 0.88);background:var(--teal)"><span>R$ 13.122</span></div>
+            <div class="tl-label">Entradas</div>
+          </div>
+          <div class="tl-bar-wrap">
+            <div class="tl-bar" style="width:calc(10315/14225*100% * 0.88);background:var(--clay)"><span>R$ 10.315</span></div>
+            <div class="tl-label">Saídas</div>
+          </div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-month">JUL</div>
+        <div class="tl-bars">
+          <div class="tl-bar-wrap">
+            <div class="tl-bar" style="width:calc(14225/14225*100% * 0.88);background:var(--teal)"><span>R$ 14.225</span></div>
+            <div class="tl-label">Entradas</div>
+          </div>
+          <div class="tl-bar-wrap">
+            <div class="tl-bar" style="width:calc(13057/14225*100% * 0.88);background:var(--clay)"><span>R$ 13.057</span></div>
+            <div class="tl-label">Saídas</div>
+          </div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-month">AGO</div>
+        <div class="tl-bars">
+          <div class="tl-bar-wrap">
+            <div class="tl-bar" style="width:calc(12088/14225*100% * 0.88);background:var(--teal)"><span>R$ 12.088</span></div>
+            <div class="tl-label">Entradas</div>
+          </div>
+          <div class="tl-bar-wrap">
+            <div class="tl-bar" style="width:calc(13213/14225*100% * 0.88);background:var(--clay)"><span>R$ 13.213</span></div>
+            <div class="tl-label">Saídas</div>
+          </div>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-month">SET</div>
+        <div class="tl-bars">
+          <div class="tl-bar-wrap">
+            <div class="tl-bar" style="width:calc(10325/14225*100% * 0.88);background:var(--teal)"><span>R$ 10.325</span></div>
+            <div class="tl-label">Entradas</div>
+          </div>
+          <div class="tl-bar-wrap">
+            <div class="tl-bar" style="width:calc(10444/14225*100% * 0.88);background:var(--clay)"><span>R$ 10.444</span></div>
+            <div class="tl-label">Saídas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:16px;margin-top:14px;font-size:11px;color:var(--ink-2)">
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;background:var(--teal);border-radius:2px;display:inline-block"></span>Entradas</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;background:var(--clay);border-radius:2px;display:inline-block"></span>Saídas</span>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <div class="section-label">02 · Renda</div>
+  <h2 class="section-title">De onde vem o dinheiro?</h2>
+  <p class="section-sub">O objetivo é fechar as contas só com o trabalho, e depois depender menos da social media, que é sazonal.</p>
+
+  <div class="grid g3">
+    <div class="card"><h3>Salário</h3><div class="hint">Criadores Intermediação e Folks Pub</div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#0f6b64"></div><span class="bar-name">Junho/26</span></div>
+        <div class="bar-val pos">R$ 3.000</div>
+        <div class="track"><div class="fill" style="width:99.9%;background:#0f6b64"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#1d8a82"></div><span class="bar-name">Julho/26</span></div>
+        <div class="bar-val pos">R$ 3.003</div>
+        <div class="track"><div class="fill" style="width:100.0%;background:#1d8a82"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#2aaba1"></div><span class="bar-name">Agosto/26</span></div>
+        <div class="bar-val pos">R$ 2.800</div>
+        <div class="track"><div class="fill" style="width:93.2%;background:#2aaba1"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#38ccc0"></div><span class="bar-name">Setembro/26</span></div>
+        <div class="bar-val pos">R$ 2.483</div>
+        <div class="track"><div class="fill" style="width:82.7%;background:#38ccc0"></div></div>
+      </div>
+      <div class="note-box" style="margin-top:14px;margin-bottom:0"><b>Padrão:</b> o salário ficou entre <b>R$ 2.483</b> e <b>R$ 3.003</b> nos quatro meses. Em setembro veio da Criadores (R$ 2.483,30). O aumento de R$ 1.000 combinado para novembro vai direto nesta linha.</div></div>
+    <div class="card"><h3>Social Media</h3><div class="hint">Serviços de social media, incluindo Jimmy's/FVC e CTG Rincão Sulino</div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#c8922a"></div><span class="bar-name">Junho/26</span></div>
+        <div class="bar-val pos">R$ 2.650</div>
+        <div class="track"><div class="fill" style="width:56.0%;background:#c8922a"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#d4a835"></div><span class="bar-name">Julho/26</span></div>
+        <div class="bar-val pos">R$ 3.050</div>
+        <div class="track"><div class="fill" style="width:64.5%;background:#d4a835"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#dbb54d"></div><span class="bar-name">Agosto/26</span></div>
+        <div class="bar-val pos">R$ 3.310</div>
+        <div class="track"><div class="fill" style="width:70.0%;background:#dbb54d"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#e4c36b"></div><span class="bar-name">Setembro/26</span></div>
+        <div class="bar-val pos">R$ 4.730</div>
+        <div class="track"><div class="fill" style="width:100.0%;background:#e4c36b"></div></div>
+      </div>
+      <div class="note-box" style="margin-top:14px;margin-bottom:0"><b>Maior fonte de trabalho e crescendo:</b> foi de <b>R$ 2.650</b> em junho para <b>R$ 4.730</b> em setembro (<b>+78%</b>), e em setembro representou <b>66%</b> do trabalho próprio. Somando salário e social media, o trabalho próprio foi de <b>R$ 5.650</b> para <b>R$ 7.213</b> (<b>+28%</b>).</div></div>
+    <div class="card"><h3>Mesada</h3><div class="hint">Repasse familiar recorrente</div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#5b4b8a"></div><span class="bar-name">Junho/26</span></div>
+        <div class="bar-val pos">R$ 3.720</div>
+        <div class="track"><div class="fill" style="width:85.6%;background:#5b4b8a"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#7260a8"></div><span class="bar-name">Julho/26</span></div>
+        <div class="bar-val pos">R$ 2.594</div>
+        <div class="track"><div class="fill" style="width:59.7%;background:#7260a8"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#8f7cc3"></div><span class="bar-name">Agosto/26</span></div>
+        <div class="bar-val pos">R$ 4.348</div>
+        <div class="track"><div class="fill" style="width:100.0%;background:#8f7cc3"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#ab99d8"></div><span class="bar-name">Setembro/26</span></div>
+        <div class="bar-val pos">R$ 2.500</div>
+        <div class="track"><div class="fill" style="width:57.5%;background:#ab99d8"></div></div>
+      </div>
+      <div class="note-box" style="margin-top:14px;margin-bottom:0"><b>Padrão:</b> o repasse varia de mês para mês, entre <b>R$ 2.500</b> e <b>R$ 4.348</b>. Por isso ele funciona melhor tratado como um reforço do mês do que como base do orçamento.</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Rumo à independência da mesada</h3>
+    <div class="hint">Quanto das saídas do mês o trabalho já cobre sozinho. A barra cheia é o objetivo: fechar as contas sem depender da mesada.</div>
+    <div class="grid g2">
+      <div>
+        <div style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:10px">Etapa 1 · Trabalho próprio (salário + social media)</div>
+        
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#0f6b64"></div><span class="bar-name">Junho/26</span></div>
+        <div class="bar-val">55%</div>
+        <div class="track"><div class="fill" style="width:54.8%;background:#0f6b64"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#1d8a82"></div><span class="bar-name">Julho/26</span></div>
+        <div class="bar-val">46%</div>
+        <div class="track"><div class="fill" style="width:46.4%;background:#1d8a82"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#2aaba1"></div><span class="bar-name">Agosto/26</span></div>
+        <div class="bar-val">46%</div>
+        <div class="track"><div class="fill" style="width:46.2%;background:#2aaba1"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#38ccc0"></div><span class="bar-name">Setembro/26</span></div>
+        <div class="bar-val">69%</div>
+        <div class="track"><div class="fill" style="width:69.1%;background:#38ccc0"></div></div>
+      </div>
+        <p style="font-size:11.5px;color:var(--ink-2)">Em setembro cobriu <b>69%</b> das saídas e <b>faltaram R$ 3.231</b> para chegar a 100%.</p>
+      </div>
+      <div>
+        <div style="font:600 11px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:10px">Etapa 2 · Só o salário, sem social media</div>
+        
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#5b4b8a"></div><span class="bar-name">Junho/26</span></div>
+        <div class="bar-val">29%</div>
+        <div class="track"><div class="fill" style="width:29.1%;background:#5b4b8a"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#7260a8"></div><span class="bar-name">Julho/26</span></div>
+        <div class="bar-val">23%</div>
+        <div class="track"><div class="fill" style="width:23.0%;background:#7260a8"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#8f7cc3"></div><span class="bar-name">Agosto/26</span></div>
+        <div class="bar-val">21%</div>
+        <div class="track"><div class="fill" style="width:21.2%;background:#8f7cc3"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#ab99d8"></div><span class="bar-name">Setembro/26</span></div>
+        <div class="bar-val">24%</div>
+        <div class="track"><div class="fill" style="width:23.8%;background:#ab99d8"></div></div>
+      </div>
+        <p style="font-size:11.5px;color:var(--ink-2)">Em setembro o salário sozinho cobriu <b>24%</b>. A social media foi <b>66%</b> do trabalho próprio do mês (era 50% em julho).</p>
+      </div>
+    </div>
+    <div style="margin-top:16px;font:600 11px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)">O que já está combinado ajuda</div>
+    <div style="overflow-x:auto"><table class="tbl-simple">
+      <thead><tr><th>Cenário (o resto igual a setembro)</th><th style="text-align:right">Trabalho próprio cobre</th><th style="text-align:right">Ainda falta</th><th style="text-align:right">Só salário cobre</th></tr></thead>
+      <tbody><tr><td>Setembro (real)</td><td class="num pos">69%</td><td class="num neg">R$ 3.231</td><td class="num">24%</td></tr><tr><td>A partir de novembro: +R$ 1.000 da Criadores</td><td class="num pos">79%</td><td class="num neg">R$ 2.231</td><td class="num">33%</td></tr><tr><td>A partir de dezembro: sem a parcela do computador</td><td class="num pos">92%</td><td class="num neg">R$ 731</td><td class="num">39%</td></tr></tbody>
+    </table></div>
+    <p style="font-size:11px;color:var(--ink-2);margin-top:10px">Cobertura = renda do trabalho ÷ saídas líquidas do mês (dossiê). Os cenários são uma estimativa que mantém tudo como em setembro, só com o aumento da Criadores e o fim da parcela do computador. As saídas de setembro incluem R$ 612 que voltaram como estorno; sem eles a cobertura de setembro seria de 73%.</p>
+  </div>
+
+  <div class="note-box" style="margin-top:16px">
+    <b>Outras entradas.</b> Além das três fontes, o dossiê registra entradas que só circulam ou voltam (transferência entre as contas, reembolsos, rateio da moradia, estorno): R$ 3.752 em junho, R$ 5.578 em julho, R$ 1.630 em agosto e R$ 612 em setembro. Elas explicam parte da variação entre os meses, por isso o trabalho próprio é a leitura mais estável da renda.
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <div class="section-label">03 · Gastos</div>
+  <h2 class="section-title">Para onde vai o dinheiro?</h2>
+  <p class="section-sub">Média dos 4 meses por categoria, em valores líquidos. Meses em que a categoria ficou do lado das entradas contam como zero.</p>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>Maiores categorias (média 4 meses)</h3>
+      <div class="hint">Base: total dos 4 meses ÷ 4 · Gastos de trabalho desconsiderados aqui, pois são ônus do ofício e tratados separadamente.</div>
+      
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#c8922a"></div><span class="bar-name">Casa (líquida do rateio)</span></div>
+        <div class="bar-val neg">R$ 1.374/mês</div>
+        <div class="track"><div class="fill" style="width:100.0%;background:#c8922a"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#0f6b64"></div><span class="bar-name">Alimentação</span></div>
+        <div class="bar-val neg">R$ 1.244/mês</div>
+        <div class="track"><div class="fill" style="width:90.5%;background:#0f6b64"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#5b4b8a"></div><span class="bar-name">Computador (parcelas)</span></div>
+        <div class="bar-val neg">R$ 1.000/mês</div>
+        <div class="track"><div class="fill" style="width:72.8%;background:#5b4b8a"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#b4462f"></div><span class="bar-name">Outros</span></div>
+        <div class="bar-val neg">R$ 926/mês</div>
+        <div class="track"><div class="fill" style="width:67.4%;background:#b4462f"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#7a8699"></div><span class="bar-name">Supermercado</span></div>
+        <div class="bar-val neg">R$ 897/mês</div>
+        <div class="track"><div class="fill" style="width:65.3%;background:#7a8699"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#2aaba1"></div><span class="bar-name">Saúde</span></div>
+        <div class="bar-val neg">R$ 675/mês</div>
+        <div class="track"><div class="fill" style="width:49.1%;background:#2aaba1"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#8c5a2b"></div><span class="bar-name">Vestuário</span></div>
+        <div class="bar-val neg">R$ 466/mês</div>
+        <div class="track"><div class="fill" style="width:33.9%;background:#8c5a2b"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#4a6fa5"></div><span class="bar-name">Combustível</span></div>
+        <div class="bar-val neg">R$ 462/mês</div>
+        <div class="track"><div class="fill" style="width:33.6%;background:#4a6fa5"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lab"><div class="dot" style="background:#a5527a"></div><span class="bar-name">Locomoção</span></div>
+        <div class="bar-val neg">R$ 294/mês</div>
+        <div class="track"><div class="fill" style="width:21.4%;background:#a5527a"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Comprometimento fixo estimado</h3>
+      <div class="hint">Gastos que voltam todo mês independentemente de decisão</div>
+      <table class="tbl-simple">
+        <thead><tr><th>Item</th><th style="text-align:right">Valor</th></tr></thead>
+        <tbody>
+          <tr><td>Aluguel</td><td class="num neg">R$ 1.508,71</td></tr><tr><td>Condomínio (a confirmar)</td><td class="num neg">R$ 803,88</td></tr><tr><td>Internet</td><td class="num neg">R$ 269,05</td></tr><tr><td>Luz (Copel)</td><td class="num neg">R$ 193,93</td></tr><tr style="background:#faf8f4"><td><b>Moradia (set/26, antes do rateio)</b></td><td class="num neg"><b>R$ 2.775,57</b></td></tr><tr><td>Computador (até nov/26)</td><td class="num neg">R$ 1.500</td></tr><tr><td>Celular novo (até mai/27)</td><td class="num neg">R$ 552</td></tr><tr><td>Imposto DAS</td><td class="num neg">R$ 86</td></tr><tr><td>Google Drive</td><td class="num neg">R$ 50</td></tr><tr><td>Streaming</td><td class="num neg">R$ 20,90</td></tr><tr style="background:#faf8f4"><td style="font-weight:600">Total fixo estimado (antes do rateio)</td><td class="num neg" style="font-weight:700">~R$ 4.984/mês</td></tr><tr><td>Rateio da moradia recebido em set/26</td><td class="num pos">−R$ 2.105</td></tr><tr><td style="font-weight:600">Depois do rateio de setembro</td><td class="num neg" style="font-weight:700">~R$ 2.879/mês</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:11px;color:var(--ink-2);margin-top:10px">
+        Moradia com base em setembro. As parcelas e os fixos programados vêm do dossiê: a partir de dezembro, com o fim da parcela do computador, eles caem de <b>R$ 2.188</b> para <b>R$ 688</b> por mês.
+      </p>
+    </div>
+  </div>
+
+  <div style="margin-top:16px" class="grid g3">
+    <div class="insight" style="--accent:var(--gold)">
+      <div class="icon">🏠</div>
+      <h4>Casa — o rateio muda o mês</h4>
+      <p>Jun: <strong>R$ 174 a favor</strong> · Jul: <strong>R$ 1.977</strong> · Ago: <strong>R$ 2.849</strong> · Set: <strong>R$ 671</strong>. Em setembro a moradia custou R$ 2.775,57 (aluguel, condomínio, internet e luz) e o rateio recebido cobriu <strong>R$ 2.105</strong>.</p>
+    </div>
+    <div class="insight" style="--accent:var(--teal)">
+      <div class="icon">🛒</div>
+      <h4>Supermercado + Alimentação</h4>
+      <p>Jun: <strong>R$ 2.550</strong> · Jul: <strong>R$ 1.419</strong> · Ago: <strong>R$ 2.085</strong> · Set: <strong>R$ 2.512</strong>. Em média, <strong>R$ 2.141/mês</strong> com comida. Em setembro, o Jimmy's no cartão somou R$ 188,50.</p>
+    </div>
+    <div class="insight" style="--accent:var(--clay)">
+      <div class="icon">👗</div>
+      <h4>Vestuário</h4>
+      <p>Jun: <strong>R$ 578,90</strong> · Jul: <strong>R$ 342,84</strong> · Ago: <strong>R$ 676,07</strong> · Set: <strong>R$ 268</strong>. Agosto foi o mês mais alto. Em setembro a compra foi na Badana (R$ 268). Média de <strong>R$ 466/mês</strong>.</p>
+    </div>
+    <div class="insight" style="--accent:var(--violet)">
+      <div class="icon">🎲</div>
+      <h4>Lazer — setembro fora do padrão</h4>
+      <p>Jun: <strong>R$ 53</strong> · Jul: <strong>R$ 50</strong> · Ago: <strong>R$ 99</strong> · Set: <strong>R$ 517,66</strong>. Os maiores itens de setembro foram Futebolcard (R$ 198) e Joia Londrina (R$ 185,80), além do cinema (R$ 74,90). Foi um mês pontual de passeios, depois de três meses bem tranquilos.</p>
+    </div>
+    <div class="insight" style="--accent:var(--slate)">
+      <div class="icon">🔧</div>
+      <h4>Trabalho (despesa) — ônus do ofício</h4>
+      <p>Jun: <strong>R$ 907</strong> · Jul: <strong>R$ 6.407</strong> · Ago: <strong>R$ 2.498</strong> · Set: <strong>R$ 1.168</strong>. Equipamentos, parcelas do celular, impostos e viagens de trabalho são custos necessários para gerar a renda. Julho concentrou uma compra única de celular (R$ 5.500); em setembro o maior item foi a parcela do celular novo (R$ 550).</p>
+    </div>
+    <div class="insight" style="--accent:var(--teal)">
+      <div class="icon">💻</div>
+      <h4>Computador — parcelas com data para acabar</h4>
+      <p>Jul: <strong>R$ 1.000</strong> · Ago: <strong>R$ 1.500</strong> · Set: <strong>R$ 1.500</strong>. É a parcela 3 de 5; as duas últimas são em outubro e novembro. Em dezembro esse valor deixa de sair todo mês.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <div class="section-label">04 · Análise geral</div>
+  <h2 class="section-title">O que os quatro meses mostram?</h2>
+  <p class="section-sub">Padrões que se repetem e o que eles significam para o dia a dia.</p>
+
+  <div class="grid g2" style="margin-bottom:16px">
+    <div>
+      <div class="ok-box">
+        <b>✅ O que está funcionando bem:</b><br><br>
+        <b>1. Trabalho próprio crescendo.</b> Salário mais social media foram de R$ 5.650 em junho para R$ 6.053 em julho, R$ 6.110 em agosto e R$ 7.213 em setembro (+28% desde junho). Com isso, o trabalho próprio passou de 55% para 69% das saídas do mês.<br><br>
+        <b>2. Setembro mais leve.</b> As saídas caíram de R$ 13.213 em agosto para R$ 10.444 em setembro, e o resultado foi de −R$ 1.124 para −R$ 119. O rateio de R$ 2.105 pesou bastante nisso.<br><br>
+        <b>3. Parcelas chegando ao fim.</b> O celular antigo e o microfone terminaram em agosto, e o computador termina em novembro. Os compromissos programados caem de R$ 2.188 para R$ 688 por mês a partir de dezembro.
+      </div>
+    </div>
+    <div>
+      <div class="alert-box">
+        <b>⚠️ O que pede atenção:</b><br><br>
+        <b>1. Mesada variando bastante.</b> Foi de R$ 4.348 em agosto para R$ 2.500 em setembro, uma diferença de R$ 1.848 em um mês. Como ela muda tanto, ajuda fechar as contas com o trabalho próprio: em setembro ele cobriu 69% das saídas e ainda faltaram R$ 3.231.<br><br>
+        <b>2. Organização final de setembro.</b> Ainda há R$ 1.001,25 em classificação final (algumas saídas e uma entrada). Isso não muda o resultado do mês, mas pode ajustar a distribuição entre categorias nas próximas conversas.
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:4px">
+    <h3>Visão completa: categoria × mês</h3>
+    <div class="hint">Valores líquidos do dossiê (R$). Em vermelho: meses 25% ou mais acima da média da categoria.</div>
+    <div style="overflow-x:auto">
+    <table class="tbl-simple">
+      <thead><tr><th>Categoria</th><th style="text-align:right">Jun/26</th><th style="text-align:right">Jul/26</th><th style="text-align:right">Ago/26</th><th style="text-align:right">Set/26</th><th style="text-align:right">Média</th></tr></thead>
+      <tbody>
+        <tr><td colspan="6" style="padding:6px 10px;font-size:10px;color:var(--ink-2);border-bottom:2px solid var(--line)">ENTRADAS</td></tr><tr><td>Social Media</td><td class="num">2.650</td><td class="num">3.050</td><td class="num">3.310</td><td class="num">4.730</td><td class="num">3.435</td></tr><tr><td>Mesada</td><td class="num">3.720</td><td class="num">2.594</td><td class="num">4.348</td><td class="num">2.500</td><td class="num">3.290</td></tr><tr><td>Salário</td><td class="num">3.000</td><td class="num">3.003</td><td class="num">2.800</td><td class="num">2.483</td><td class="num">2.822</td></tr><tr><td>Outros (entrada líquida)</td><td class="num" style="color:#c3bcae">—</td><td class="num">5.578</td><td class="num">1.000</td><td class="num" style="color:#c3bcae">—</td><td class="num">1.645</td></tr><tr><td>Transferência entre contas</td><td class="num">2.146</td><td class="num" style="color:#c3bcae">—</td><td class="num">370</td><td class="num" style="color:#c3bcae">—</td><td class="num">629</td></tr><tr><td>Computador (reembolso)</td><td class="num">1.000</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num">250</td></tr><tr><td>Estorno (entrada)</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num">612</td><td class="num">153</td></tr><tr><td>ONG</td><td class="num">102</td><td class="num" style="color:#c3bcae">—</td><td class="num">260</td><td class="num" style="color:#c3bcae">—</td><td class="num">91</td></tr><tr><td>Celular (reembolso)</td><td class="num">250</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num">62</td></tr><tr><td>Casa (rateio recebido)</td><td class="num">174</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num">44</td></tr><tr><td>Transferência</td><td class="num">80</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num">20</td></tr><tr style="background:#f5f8f5;font-weight:700"><td>Total entradas</td><td class="num pos">13.122</td><td class="num pos">14.225</td><td class="num pos">12.088</td><td class="num pos">10.325</td><td class="num pos"><b>12.440</b></td></tr><tr><td colspan="6" style="padding:6px 10px;font-size:10px;color:var(--ink-2);border-bottom:2px solid var(--line)">SAÍDAS</td></tr><tr><td>Trabalho</td><td class="num">907</td><td class="num neg">6.407</td><td class="num">2.498</td><td class="num">1.168</td><td class="num">2.745</td></tr><tr><td>Casa (líquida do rateio)</td><td class="num" style="color:#c3bcae">—</td><td class="num neg">1.977</td><td class="num neg">2.849</td><td class="num">671</td><td class="num">1.374</td></tr><tr><td>Alimentação</td><td class="num">1.495</td><td class="num">846</td><td class="num">1.305</td><td class="num">1.330</td><td class="num">1.244</td></tr><tr><td>Computador (parcelas)</td><td class="num" style="color:#c3bcae">—</td><td class="num">1.000</td><td class="num neg">1.500</td><td class="num neg">1.500</td><td class="num">1.000</td></tr><tr><td>Outros</td><td class="num neg">2.900</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num">804</td><td class="num">926</td></tr><tr><td>Supermercado</td><td class="num">1.055</td><td class="num">573</td><td class="num">780</td><td class="num neg">1.182</td><td class="num">897</td></tr><tr><td>Em classificação</td><td class="num neg">960</td><td class="num">430</td><td class="num">660</td><td class="num neg">1.001</td><td class="num">763</td></tr><tr><td>Saúde</td><td class="num neg">1.388</td><td class="num">210</td><td class="num neg">945</td><td class="num">156</td><td class="num">675</td></tr><tr><td>Vestuário</td><td class="num">579</td><td class="num">343</td><td class="num neg">676</td><td class="num">268</td><td class="num">466</td></tr><tr><td>Combustível</td><td class="num">364</td><td class="num">503</td><td class="num neg">658</td><td class="num">321</td><td class="num">462</td></tr><tr><td>Locomoção</td><td class="num">106</td><td class="num neg">480</td><td class="num">103</td><td class="num neg">489</td><td class="num">294</td></tr><tr><td>Presentes</td><td class="num">48</td><td class="num" style="color:#c3bcae">—</td><td class="num neg">525</td><td class="num">230</td><td class="num">201</td></tr><tr><td>Estética</td><td class="num">130</td><td class="num">190</td><td class="num neg">394</td><td class="num">34</td><td class="num">187</td></tr><tr><td>Lazer</td><td class="num">53</td><td class="num">50</td><td class="num">99</td><td class="num neg">518</td><td class="num">180</td></tr><tr><td>Transferência entre contas</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num">500</td><td class="num">125</td></tr><tr><td>Finanças</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num neg">200</td><td class="num neg">200</td><td class="num">100</td></tr><tr><td>Estorno</td><td class="num">200</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num">50</td></tr><tr><td>Cachorros</td><td class="num neg">87</td><td class="num">27</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num">28</td></tr><tr><td>Streaming</td><td class="num neg">43</td><td class="num">21</td><td class="num">21</td><td class="num">21</td><td class="num">26</td></tr><tr><td>ONG (líquida)</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num" style="color:#c3bcae">—</td><td class="num">53</td><td class="num">13</td></tr><tr style="font-weight:700;background:#fdf0ee"><td>Total saídas</td><td class="num neg">10.315</td><td class="num neg">13.057</td><td class="num neg">13.213</td><td class="num neg">10.444</td><td class="num neg"><b>11.757</b></td></tr><tr style="font-weight:700;font-size:14px"><td>Resultado</td><td class="num pos">+2.808</td><td class="num pos">+1.168</td><td class="num neg">−1.124</td><td class="num neg">−119</td><td class="num pos"><b>+683</b></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p style="font-size:10.5px;color:var(--ink-2);margin-top:8px">* Média = total dos 4 meses ÷ 4. Junho vem de um extrato (Inter); de julho em diante, duas contas. Categorias com entrada e saída no mesmo mês aparecem só pela diferença.</p>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <div class="section-label">05 · O que fazer com isso?</div>
+  <h2 class="section-title">Ideias práticas para levar daqui</h2>
+  <p class="section-sub">Não é uma lista de cortes: é sobre deixar o dinheiro mais previsível e intencional.</p>
+
+  <div class="grid g2">
+    <div class="insight" style="--accent:var(--teal)">
+      <div class="icon">🎯</div>
+      <h4>1. Etapa 1: fechar as contas com o trabalho próprio</h4>
+      <p>Em setembro faltaram <strong>R$ 3.231</strong> para o trabalho cobrir 100% das saídas. Dois movimentos já combinados reduzem isso: o aumento de R$ 1.000 da Criadores (novembro) e o fim da parcela do computador (dezembro). Com os dois, o que falta cai para <strong>R$ 731</strong> por mês, se o resto ficar como em setembro.</p>
+    </div>
+    <div class="insight" style="--accent:var(--violet)">
+      <div class="icon">🔧</div>
+      <h4>2. Compras de equipamento: planejar antes de parcelar</h4>
+      <p>Os equipamentos de trabalho foram o maior gasto pontual do período: em julho, só uma compra de celular somou <strong>R$ 5.500</strong>, e hoje ainda há parcelas ativas (celular novo, <strong>R$ 552</strong> por mês até maio/27). Antes de uma nova compra, vale combinar de onde ela sai, para não pesar na Etapa 1 nem no ritmo da meta da mudança.</p>
+    </div>
+    <div class="insight" style="--accent:var(--gold)">
+      <div class="icon">📱</div>
+      <h4>3. Social media: extra que alimenta a meta</h4>
+      <p>A social media já é <strong>66%</strong> do trabalho próprio de setembro e foi de <strong>R$ 2.650</strong> para <strong>R$ 4.730</strong> desde junho. Como é sazonal, funciona melhor como renda extra do que como base. Se fizer sentido, os meses fortes vão para a meta da mudança, e os fracos não mexem nas contas fixas. Mapear quais meses costumam ser mais fortes ajuda a planejar.</p>
+    </div>
+    <div class="insight" style="--accent:var(--clay)">
+      <div class="icon">🧱</div>
+      <h4>4. Etapa 2: o salário sozinho</h4>
+      <p>Hoje o salário sozinho cobre <strong>24%</strong> das saídas. Com o aumento da Criadores sobe para <strong>33%</strong> e, sem a parcela do computador, para <strong>39%</strong>. É esse número que mostra o quanto falta para a social media deixar de ser necessária para as contas.</p>
+    </div>
+    <div class="insight" style="--accent:var(--teal)">
+      <div class="icon">🏠</div>
+      <h4>5. Mudança de apartamento no 2º semestre de 2027</h4>
+      <p>Se fizer sentido, vale definir com o namorado um valor e um prazo para a mudança, incluindo os custos de se instalar. Também vale simular a moradia nova: hoje o rateio recebido (R$ 2.105 em setembro) faz parte do cálculo da moradia, e isso pode mudar quando o apartamento mudar.</p>
+    </div>
+    <div class="insight" style="--accent:var(--violet)">
+      <div class="icon">📈</div>
+      <h4>6. Acompanhar o indicador todo mês</h4>
+      <p>A cobertura das saídas pelo trabalho próprio e pelo salário é um número simples para olhar a cada fechamento. Quando a Etapa 1 chegar a 100%, a mesada deixa de ser necessária para o básico; quando a Etapa 2 chegar lá, a social media também.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:24px;background:var(--ink);border-radius:12px;padding:24px 28px;color:#fff">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.6;margin-bottom:10px">Conclusão</div>
+    <div style="font-family:Fraunces,serif;font-size:clamp(16px,3vw,22px);font-weight:700;line-height:1.3;margin-bottom:12px">Quatro meses positivos no acumulado e trabalho próprio crescendo.</div>
+    <p style="font-size:13px;opacity:.8;line-height:1.6;max-width:720px">
+      O que mais importa para o objetivo da Roberta é que o trabalho próprio passou de 55% para 69% das saídas entre junho e setembro. O aumento da Criadores em novembro e o fim da parcela do computador em dezembro aproximam esse número de 100%. O próximo passo é dar destino à mesada e à social media, que viram a meta da mudança do 2º semestre de 2027.
+    </p>
+  </div>
+</div>
+
+<div class="foot">
+  Análise elaborada com base no Dossiê Financeiro v8 (09/11/2026) · Roberta · Jun–set/2026 · Valores em R$, líquidos. O aumento de R$ 1.000 da Criadores a partir de novembro é informação do consultor e ainda não consta no dossiê.
+</div>
+
+</div>
+</body>
+</html>
